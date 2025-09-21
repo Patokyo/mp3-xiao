@@ -26,10 +26,20 @@ long lastPosition = 0;
 #define BUTTON_SELECT 3
 
 //variables
-String selectedAlbumName;
-int selectedAlbumIndex = 1;
-int albumAmount;
-int mode = 0; //(0 -> selecting album, 1 -> playing album, 2 -> playing shuffle)
+bool playing = true;
+int count;
+String chosenFile;
+String currentSongPath;
+String currentDirectory;
+
+//bitmaps
+// 'play', 16x16px
+const unsigned char bitmap_play [] PROGMEM = {
+	0xc0, 0x00, 0xf0, 0x00, 0xfc, 0x00, 0xff, 0x00, 0xff, 0xc0, 0xff, 0xf0, 0xff, 0xfc, 0xff, 0xff, 
+	0xff, 0xff, 0xff, 0xfc, 0xff, 0xf0, 0xff, 0xe0, 0xff, 0x80, 0xfe, 0x00, 0xf8, 0x00, 0xe0, 0x00
+};
+
+
 
 void setup() {
   Serial.begin(115200);
@@ -41,32 +51,66 @@ void setup() {
   display.clearDisplay();
   display.setTextSize(1);
   display.setTextColor(SH110X_WHITE);
-  displayAlbums();
+  display.println("Working");
+  display.display();
+  
+  currentDirectory = "/";
+  shufflePick();
 }
 
 void loop() {
+  if(playing){
+    playingUI();
+  }
+  else{
+
+  }
   //rotary encoder
   encoder.tick();
   long pos = encoder.getPosition();
-  Serial.println(pos);
   if (pos != lastPosition) {
     lastPosition = pos;
-    if(mode==0){
-      selectedAlbumIndex = pos;
-      displayAlbums();
-    }
-    if(mode==1){
-      //
-    }
   }
 
   //button
   if (digitalRead(BUTTON_SELECT) == LOW) {
-    if(mode==0){
-      displaySongs();
-      mode = 1;
-      delay(200); // debounce
-    }
+
   }
 
+}
+
+void playingUI(){
+  display.clearDisplay();
+  display.setTextSize(1);
+  display.setCursor(0, 0);
+  display.println(currentDirectory);
+  display.println(currentSongPath);
+
+  display.setTextSize(2);
+  display.setCursor(0, 64);
+  display.drawBitmap(56, 56, bitmap_play, 16, 16, SH110X_WHITE);
+  display.display();
+}
+
+void shufflePick(){
+  count = 0;
+  shuffleDirectory(SD.open(currentDirectory));
+  currentSongPath = chosenFile;
+  Serial.println(currentSongPath);
+}
+
+void shuffleDirectory(File directory){
+  File song;
+  while((song = directory.openNextFile())){
+    if(song.isDirectory()){
+      shuffleDirectory(song);
+    }
+    else{
+      count++;
+      if(random(count)==0){
+        chosenFile = song.name();
+      }
+    }
+    song.close();
+  }
 }
