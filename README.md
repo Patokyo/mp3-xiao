@@ -1,4 +1,4 @@
-#mp3 xiao  
+# mp3 xiao  
 An mp3 player using a Seeed Studio Xiao Esp32-S3 microcontroller
 
 # Components:
