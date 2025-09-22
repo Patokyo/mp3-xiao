@@ -37,7 +37,6 @@ File currentAlbum;
 String shuffleDir = "/";
 
 int volume = 12;
-float filtered = 0;
 
 int count;
 String chosenFile;
@@ -125,7 +124,7 @@ void setup() {
     display.println("Initialising...");
     display.display();
 
-    shufflePick(shuffleDir);
+    shuffle(shuffleDir);
 }
 
 void loop(){
@@ -141,8 +140,7 @@ void loop(){
     if(UIMode=="play"){
       if(songEnd){
         if(playMode=="shuffle"){
-          shufflePick(shuffleDir);
-          
+          shuffle(shuffleDir);
         } else if(playMode=="straight"){
           File currentFile = currentAlbum.openNextFile();
           audio.connecttoFS(SD, (String(currentAlbumDir) + "/" + currentFile.name()).c_str());
@@ -158,36 +156,45 @@ void loop(){
     }
 }
 
-void shufflePick(String directory) {
-	count = 0;
-	chosenFile = "";
-
-  String parentDir = "/";
-  int lastSlash = directory.lastIndexOf('/');
-  if (lastSlash > 0) {
-      parentDir = directory.substring(0, lastSlash);
+int countLines(File file) {
+  int lines = 0;
+  while (file.available()) {
+    if (file.read() == '\n') lines++;
   }
-	shuffleDirectory(SD.open(directory), parentDir);
-	currentSongPath = chosenFile;
-	audio.connecttoFS(SD, currentSongPath.c_str());
+  file.seek(0); // rewind to start
+  return lines;
+}
+
+String pickRandomLine(File file, int totalLines) {
+  int target = random(totalLines); // 0 .. totalLines-1
+  int currentLine = 0;
+  String line = "";
+  
+  while (file.available()) {
+    char c = file.read();
+    if (c == '\n') {
+      if (currentLine == target) {
+        return line;
+      }
+      line = "";
+      currentLine++;
+    } else {
+      line += c;
+    }
+  }
+  return line; // fallback for last line
+}
+
+void shuffle(String directory){
+  playMode = "shuffle";
+  File indexFile = SD.open(directory+"/index.txt");
+  int totalSongs = countLines(indexFile);
+  String songPath = pickRandomLine(indexFile, totalSongs);
+  Serial.println(songPath);
+  indexFile.close();
+  audio.connecttoFS(SD, songPath.c_str());
   songStartTime = millis();
   timepassed = 0;
-}
- 
-void shuffleDirectory(File directory, String parentPath) {
-	File song;
-	while ((song = directory.openNextFile())) {
-		String fullPath = parentPath + "/" + song.name();  // build full path
-		if (song.isDirectory()) {
-			shuffleDirectory(song, fullPath);              // recurse deeper
-		} else {
-			count++;
-			if (random(count) == 0) {
-				chosenFile = fullPath;                    // save full path
-			}
-		}
-		song.close();
-	}
 }
 
 void playAlbum(String albumDir){
