@@ -16,15 +16,15 @@
 Adafruit_SH1107 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
 // Digital I/O used
-#define SD_CS         43
+#define SD_CS         3
 #define SPI_MOSI      9
 #define SPI_MISO      8
 #define SPI_SCK       7
-#define I2S_DOUT      2
+#define I2S_DOUT      44
 #define I2S_BCLK      1
-#define I2S_LRC       3
+#define I2S_LRC       2
 #define POT_PIN       4
-#define BUTTON_PIN    44
+#define BUTTON_PIN    43
 
 Audio audio;
 
@@ -52,6 +52,12 @@ String displayAlbum;
 long songLength;
 unsigned long songStartTime = 0;  // when the song started
 unsigned long timepassed = 0;     // elapsed time in ms
+
+#define MAX_ALBUMS 128
+#define NAME_LEN   20
+char albumNames[MAX_ALBUMS][NAME_LEN];
+int albumCount = 0;
+
 
 //bitmaps
 // 'play', 16x16px
@@ -112,7 +118,7 @@ void setup() {
     pinMode(SD_CS, OUTPUT);
     digitalWrite(SD_CS, HIGH);
     SPI.begin(SPI_SCK, SPI_MISO, SPI_MOSI);
-    SPI.setFrequency(1000000);
+    SPI.setFrequency(4000000);
     Serial.begin(115200);
     SD.begin(SD_CS);
     display.begin();
@@ -127,6 +133,9 @@ void setup() {
     display.display();
 
     shuffle(shuffleDir);
+    cacheAlbums();
+    Serial.print("Free ram heap: ");
+    Serial.println(ESP.getFreeHeap());
 }
 
 void loop(){
@@ -137,7 +146,43 @@ void loop(){
       if(UIMode=="play"){
         paused = !paused;   // toggle pause/play
         audio.pauseResume();
-        delay(50);          // simple debounce
+        delay(1000);
+        int index;
+        while(digitalRead(BUTTON_PIN) == LOW){
+          updatePot();
+          index = map(potValue, 0, 4095, 0, 2);
+          display.clearDisplay();
+          display.setCursor(0,0);
+          if(index==0){
+            display.print(">");
+            display.println("Shuffle");
+            display.println(" Albums");
+            display.println(" Playlists");
+          } else if(index==1){
+            display.println(" Shuffle");
+            display.print(">");
+            display.println("Albums");
+            display.println(" Playlists");
+          } else if(index==2){
+            display.println(" Shuffle");
+            display.println(" Albums");
+            display.print(">");
+            display.println("Playlists");
+          }
+          display.display();
+        }
+        if(index==0){
+          UIMode = "play";
+          playMode = "shuffle";
+          shuffleDir = "/";
+          shuffle(shuffleDir);
+        } else if(index==1){
+          UIMode = "select";
+          selectMode = "album";
+        } else if(index==2){
+          UIMode = "select";
+          selectMode = "playlist";
+        }
       }  
     }
 
@@ -156,11 +201,11 @@ void loop(){
       playUI();
     } else if(UIMode=="select"){
       updatePot();
-      selectionIndex = map(potValue, 0, 4095, 0, 16); // 0-16 for 16 lines per screen
-      if(selectionIndex>16){
-        selectionIndex = 0;
-      } else if(selectionIndex<1){
-        selectionIndex = 16;
+      selectionIndex = map(potValue, 0, 4095, 0, albumCount); // 0-16 for 16 lines per screen
+      if(digitalRead(BUTTON_PIN) == LOW){
+        playMode = "album";
+        UIMode = "play";
+        //playAlbum(currentlySelectedAlbum)
       }
       selectUI();
     }
@@ -228,7 +273,7 @@ void updatePot() {
   int potReading = analogRead(POT_PIN); // 0 - 4095 on ESP32
   
   if (potReading != potValue) {  // only update if changed
-      potValue = newValue;
+      potValue = potReading;
   }
 }
 
@@ -271,29 +316,49 @@ void playUI(){
   display.display();
 }
 
-void selectUI(){
-  display.clearDisplay();
-  display.setTextSize(1);
+void cacheAlbums() {
+	albumCount = 0; // reset
 
-  String dir;
-  if(selectMode=="album"){
-    dir = "/Album";
-  } else{
-    dir = "/Playlist";
-  }
+	File dir = SD.open("/Albums");
 
-  File dirFile = SD.open(dir);
-  File folder;
-  int index = 0;
-  while(folder = dirFile.openNextFile() && index<16){
-    if(index==selectionIndex){
-      display.print(">");
-    } else{
-      display.print(" ");
-    }
-    if(folder.isDirectory())
-      display.println(folder.name());
-    }
-    folder.close();
-  }
+	File entry;
+	while ((entry = dir.openNextFile()) && albumCount < MAX_ALBUMS) {
+		if (entry.isDirectory()) {
+			strncpy(albumNames[albumCount], entry.name(), NAME_LEN - 1);
+			albumNames[albumCount][NAME_LEN - 1] = '\0'; // ensure null termination
+			albumCount++;
+		}
+		entry.close();
+	}
+	dir.close();
 }
+
+void selectUI() {
+	display.clearDisplay();
+	display.setTextSize(1);
+
+	const int visibleRows = 16;     // how many rows can fit on screen
+	const int centerRow   = visibleRows / 2;  
+
+	// Figure out which album should be at the top
+	int startIndex = selectionIndex - centerRow;
+	if (startIndex < 0) startIndex = 0;
+	if (startIndex > albumCount - visibleRows) {
+		startIndex = albumCount - visibleRows;
+	}
+	if (startIndex < 0) startIndex = 0; // in case albumCount < visibleRows
+
+	// Draw the visible list
+	for (int i = 0; i < visibleRows && (startIndex + i) < albumCount; i++) {
+		display.setCursor(0, i * 8);  // 8 px per row for text size 1
+		if ((startIndex + i) == selectionIndex) {
+			display.print(">");
+		} else {
+			display.print(" ");
+		}
+		display.println(albumNames[startIndex + i]);
+	}
+
+	display.display();
+}
+
