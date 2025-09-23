@@ -31,15 +31,17 @@ Audio audio;
 //variables
 String UIMode = "play"; //play or select 
 String playMode = "shuffle"; //shuffle, straight
+String selectMode; //album, playlist
+
 bool paused = false;
 bool songEnd = false;
+
 File currentAlbum;
 String shuffleDir = "/";
 
 int volume = 12;
-
-int count;
-String chosenFile;
+int selectionIndex;
+int potValue;
 
 String currentSongPath;
 String currentAlbumDir;
@@ -132,9 +134,11 @@ void loop(){
     audio.loop();
 
     if(digitalRead(BUTTON_PIN) == LOW) {
+      if(UIMode=="play"){
         paused = !paused;   // toggle pause/play
         audio.pauseResume();
         delay(50);          // simple debounce
+      }  
     }
 
     if(UIMode=="play"){
@@ -142,13 +146,23 @@ void loop(){
         if(playMode=="shuffle"){
           shuffle(shuffleDir);
         } else if(playMode=="straight"){
-          File currentFile = currentAlbum.openNextFile();
-          audio.connecttoFS(SD, (String(currentAlbumDir) + "/" + currentFile.name()).c_str());
+          nextSong();
         }
         songEnd = false;
       }
-      updateVolume();
+      updatePot();
+      volume = map(potValue, 0, 4095, 0, 21); // 0-21 matches your audio.setVolume();
+      audio.setVolume(volume);
       playUI();
+    } else if(UIMode=="select"){
+      updatePot();
+      selectionIndex = map(potValue, 0, 4095, 0, 16); // 0-16 for 16 lines per screen
+      if(selectionIndex>16){
+        selectionIndex = 0;
+      } else if(selectionIndex<1){
+        selectionIndex = 16;
+      }
+      selectUI();
     }
 
     if(!paused && !songEnd){
@@ -189,10 +203,9 @@ void shuffle(String directory){
   playMode = "shuffle";
   File indexFile = SD.open(directory+"/index.txt");
   int totalSongs = countLines(indexFile);
-  String songPath = pickRandomLine(indexFile, totalSongs);
-  Serial.println(songPath);
+  String currentSongPath = pickRandomLine(indexFile, totalSongs);
   indexFile.close();
-  audio.connecttoFS(SD, songPath.c_str());
+  audio.connecttoFS(SD, currentSongPath.c_str());
   songStartTime = millis();
   timepassed = 0;
 }
@@ -202,21 +215,24 @@ void playAlbum(String albumDir){
   currentAlbum = SD.open(albumDir);
   playMode = "straight";
   File currentFile = currentAlbum.openNextFile();
+  currentSongPath = albumDir + currentFile.name();
   audio.connecttoFS(SD, (String(albumDir) + "/" + currentFile.name()).c_str());
 }
 
-void updateVolume() {
-  int potValue = analogRead(POT_PIN); // 0 - 4095 on ESP32
-  int newVolume = map(potValue, 0, 4095, 0, 21); // 0-21 matches your audio.setVolume()
+void nextSong(){
+  File currentFile = currentAlbum.openNextFile();
+  audio.connecttoFS(SD, (String(currentAlbumDir) + "/" + currentFile.name()).c_str());
+}
+
+void updatePot() {
+  int potReading = analogRead(POT_PIN); // 0 - 4095 on ESP32
   
-  if (newVolume != volume) {  // only update if changed
-      volume = newVolume;
-      audio.setVolume(volume);
+  if (potReading != potValue) {  // only update if changed
+      potValue = newValue;
   }
 }
 
 void playUI(){
-  display.clearDisplay();
   display.clearDisplay();
   display.setTextSize(1);
 
@@ -253,4 +269,31 @@ void playUI(){
 
 
   display.display();
+}
+
+void selectUI(){
+  display.clearDisplay();
+  display.setTextSize(1);
+
+  String dir;
+  if(selectMode=="album"){
+    dir = "/Album";
+  } else{
+    dir = "/Playlist";
+  }
+
+  File dirFile = SD.open(dir);
+  File folder;
+  int index = 0;
+  while(folder = dirFile.openNextFile() && index<16){
+    if(index==selectionIndex){
+      display.print(">");
+    } else{
+      display.print(" ");
+    }
+    if(folder.isDirectory())
+      display.println(folder.name());
+    }
+    folder.close();
+  }
 }

@@ -96,7 +96,7 @@ void setup() {
   shufflePick();
 
   audio.setPinout(I2S_BCLK, I2S_LRC, I2S_DOUT);
-  audio.setVolume(12); // 0...21
+  audio.setVolume(12);
 
   // play file from root of SD card
   Audio::audio_info_callback = my_audio_info;
