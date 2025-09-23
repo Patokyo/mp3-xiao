@@ -201,7 +201,7 @@ void loop(){
       playUI();
     } else if(UIMode=="select"){
       updatePot();
-      selectionIndex = map(potValue, 0, 4095, 0, albumCount); // 0-16 for 16 lines per screen
+      selectionIndex = map(potValue, 0, 4095, 0, albumCount-1);
       if(digitalRead(BUTTON_PIN) == LOW){
         playMode = "album";
         UIMode = "play";
