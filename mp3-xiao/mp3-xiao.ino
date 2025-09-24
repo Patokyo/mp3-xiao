@@ -54,8 +54,8 @@ unsigned long songStartTime = 0;  // when the song started
 unsigned long timepassed = 0;     // elapsed time in ms
 
 #define MAX_ALBUMS 128
-#define NAME_LEN   20
-char albumNames[MAX_ALBUMS][NAME_LEN];
+#define NAME_LEN   128
+char albumPaths[MAX_ALBUMS][NAME_LEN];
 int albumCount = 0;
 
 
@@ -86,7 +86,6 @@ const unsigned char bitmap_skip [] PROGMEM = {
 
 
 void my_audio_info(Audio::msg_t m) {
-    Serial.printf("%s: %s\n", m.s, m.msg);
     String type = String(m.s);
     String message = String(m.msg);
 
@@ -107,7 +106,6 @@ void my_audio_info(Audio::msg_t m) {
             }
         }
     } else if(type=="eof"){
-      Serial.println("Song ended");
       songEnd = true;
     }
 }
@@ -118,7 +116,7 @@ void setup() {
     pinMode(SD_CS, OUTPUT);
     digitalWrite(SD_CS, HIGH);
     SPI.begin(SPI_SCK, SPI_MISO, SPI_MOSI);
-    SPI.setFrequency(4000000);
+    SPI.setFrequency(1000000);
     Serial.begin(115200);
     SD.begin(SD_CS);
     display.begin();
@@ -146,42 +144,67 @@ void loop(){
       if(UIMode=="play"){
         paused = !paused;   // toggle pause/play
         audio.pauseResume();
-        delay(1000);
-        int index;
+        playUI();
+
+        unsigned long pressStart = millis();
+        bool doublePressed = false;
         while(digitalRead(BUTTON_PIN) == LOW){
-          updatePot();
-          index = map(potValue, 0, 4095, 0, 2);
-          display.clearDisplay();
-          display.setCursor(0,0);
-          if(index==0){
-            display.print(">");
-            display.println("Shuffle");
-            display.println(" Albums");
-            display.println(" Playlists");
-          } else if(index==1){
-            display.println(" Shuffle");
-            display.print(">");
-            display.println("Albums");
-            display.println(" Playlists");
-          } else if(index==2){
-            display.println(" Shuffle");
-            display.println(" Albums");
-            display.print(">");
-            display.println("Playlists");
+          if((millis()-pressStart)>1000){
+            int index;
+            while(digitalRead(BUTTON_PIN) == LOW){
+              updatePot();
+              index = map(potValue, 0, 4095, 0, 2);
+              display.clearDisplay();
+              display.setCursor(0,0);
+              if(index==0){
+                display.print(">");
+                display.println("Shuffle");
+                display.println(" Albums");
+                display.println(" Playlists");
+              } else if(index==1){
+                display.println(" Shuffle");
+                display.print(">");
+                display.println("Albums");
+                display.println(" Playlists");
+              } else if(index==2){
+                display.println(" Shuffle");
+                display.println(" Albums");
+                display.print(">");
+                display.println("Playlists");
+              }
+              display.display();
+            }
+            if(index==0){
+              UIMode = "play";
+              playMode = "shuffle";
+              shuffleDir = "/";
+              shuffle(shuffleDir);
+            } else if(index==1){
+              UIMode = "select";
+              selectMode = "album";
+            } else if(index==2){
+              UIMode = "select";
+              selectMode = "playlist";
+            }
+            break;
           }
-          display.display();
         }
-        if(index==0){
-          UIMode = "play";
-          playMode = "shuffle";
-          shuffleDir = "/";
-          shuffle(shuffleDir);
-        } else if(index==1){
-          UIMode = "select";
-          selectMode = "album";
-        } else if(index==2){
-          UIMode = "select";
-          selectMode = "playlist";
+
+        while(millis() - pressStart < 500){
+            if(digitalRead(BUTTON_PIN) == LOW){
+                doublePressed = true;
+                // wait for release to avoid retriggering
+                while(digitalRead(BUTTON_PIN) == LOW);
+                break;
+            }
+        }
+
+        if(doublePressed){
+            songEnd = true;   // double press action
+            display.setCursor(0, 0);
+            display.println("Skipped!");
+            display.display();
+            return;
         }
       }  
     }
@@ -203,9 +226,10 @@ void loop(){
       updatePot();
       selectionIndex = map(potValue, 0, 4095, 0, albumCount-1);
       if(digitalRead(BUTTON_PIN) == LOW){
-        playMode = "album";
+        playAlbum(String(albumPaths[selectionIndex]));
+        playMode = "straight";
         UIMode = "play";
-        //playAlbum(currentlySelectedAlbum)
+        delay(200);
       }
       selectUI();
     }
@@ -251,22 +275,34 @@ void shuffle(String directory){
   String currentSongPath = pickRandomLine(indexFile, totalSongs);
   indexFile.close();
   audio.connecttoFS(SD, currentSongPath.c_str());
+  if(paused){
+    paused=false;
+  }
   songStartTime = millis();
   timepassed = 0;
 }
 
 void playAlbum(String albumDir){
   currentAlbumDir = albumDir;
-  currentAlbum = SD.open(albumDir);
-  playMode = "straight";
+  currentAlbum = SD.open("/" + albumDir);
   File currentFile = currentAlbum.openNextFile();
-  currentSongPath = albumDir + currentFile.name();
-  audio.connecttoFS(SD, (String(albumDir) + "/" + currentFile.name()).c_str());
+  currentSongPath = albumDir + "/" + currentFile.name();
+  audio.connecttoFS(SD, currentSongPath.c_str());
+  if(paused){
+    paused=false;
+  }
+  songStartTime = millis();
+  timepassed = 0;
 }
 
 void nextSong(){
   File currentFile = currentAlbum.openNextFile();
   audio.connecttoFS(SD, (String(currentAlbumDir) + "/" + currentFile.name()).c_str());
+  if(paused){
+    paused=false;
+  }
+  songStartTime = millis();
+  timepassed = 0;
 }
 
 void updatePot() {
@@ -319,19 +355,23 @@ void playUI(){
 void cacheAlbums() {
 	albumCount = 0; // reset
 
-	File dir = SD.open("/Albums");
+	File file = SD.open("/albums.txt");
 
-	File entry;
-	while ((entry = dir.openNextFile()) && albumCount < MAX_ALBUMS) {
-		if (entry.isDirectory()) {
-			strncpy(albumNames[albumCount], entry.name(), NAME_LEN - 1);
-			albumNames[albumCount][NAME_LEN - 1] = '\0'; // ensure null termination
+	while (file.available() && albumCount < MAX_ALBUMS) {
+		String line = file.readStringUntil('\n');
+		line.trim(); // remove \r or spaces
+
+		if (line.length() > 0) {
+			// Copy into albumPaths buffer
+			strncpy(albumPaths[albumCount], line.c_str(), NAME_LEN - 1);
+			albumPaths[albumCount][NAME_LEN - 1] = '\0'; // ensure null termination
 			albumCount++;
 		}
-		entry.close();
 	}
-	dir.close();
+
+	file.close();
 }
+
 
 void selectUI() {
 	display.clearDisplay();
@@ -356,7 +396,13 @@ void selectUI() {
 		} else {
 			display.print(" ");
 		}
-		display.println(albumNames[startIndex + i]);
+		String path = String(albumPaths[startIndex + i]);
+    path.remove(0, strlen("Albums/"));
+    // Truncate to 20 chars
+    if (path.length() > 20) {
+      path = path.substring(0, 20);
+    }
+    display.println(path);
 	}
 
 	display.display();
