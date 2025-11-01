@@ -5,8 +5,8 @@ An mp3 player using a Seeed Studio Xiao Esp32-S3 microcontroller
 Seeed Studio Xiao Esp32-S3  
 DAC Decoder with 3.5mm jack - PCM5102A  
 Micro-SD card reader module  
-OLED display - 1.5 inch, 128x128, SH1107, 4 pin  
-Rotary encoder with push button  
+OLED display - SDD1306 128x64, 4 pin  
+3 Push buttons
 
 # UI
 ## Modes:
@@ -22,3 +22,9 @@ OLED display - displays folders/files in current directory, e.g. Playlists/Album
 Rotary encoder - Rotate to browse folders/files, press to select  
 
 website for making bitmap icons https://javl.github.io/image2cpp/
+
+Values for resistor ladder: 4096 - no press
+Max up: 363
+Min up: 299
+Max down: 1965
+Min down: 1907
