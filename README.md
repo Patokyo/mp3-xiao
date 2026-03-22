@@ -1,33 +1,22 @@
-# mp3 xiao  
-An mp3 player using a Seeed Studio Xiao Esp32-S3 microcontroller
+#MP3 Xiao
 
-# Components:
-Seeed Studio Xiao Esp32-S3  
-DAC Decoder with 3.5mm jack - PCM5102A  
-Micro-SD card reader module  
-OLED display - SDD1306 128x64, 4 pin  
-3 Push buttons
+A portable DIY MP3 player built using the Seeed Studio XIAO ESP32-S3
 
-# UI
-## Modes:
-Playing(folder, mode) - plays songs in the folder using the mode given, e.g. shuffle, straight  
-Playlist/Album select - option between playlist/album, then displays all the playlists/albums on the sd card  
+#Overview
 
-### Playing:
-OLED display - current folder, currently playing song, progress bar, play/pause indicator and volume bar. 
-Up Button - Press to increase volume.
-Down Button - Press to decrease volume.
-Big Button - Press to toggle playback/pause. Hold to go into Playlist/Album select mode.
+MP3 Xiao is a compact, battery-powered music player designed from scratch using embedded systems principles. It features SD card audio playback, a simple button-based interface, and a clean OLED display for navigation and playback information.
 
-### Playlist/Album select:
-OLED display - displays folders/files in current directory, e.g. Playlists/Albums to start, then shows all Playlist files or Album folders  
-Up & Down buttons to scroll through selections.
-Big button to select
-
-website for making bitmap icons https://javl.github.io/image2cpp/
-
-Values for resistor ladder: 4096 - no press
-Max up: 363
-Min up: 299
-Max down: 1965
-Min down: 1907
+#Hardware Components
+Microcontroller: Seeed Studio XIAO ESP32-S3
+DAC: PCM5102A (I2S, 3.5mm audio output)
+Storage: MicroSD card module
+Display: SSD1306 OLED (128×64, I2C, 4-pin)
+Input: 3× push buttons (via resistor ladder)
+Power: LiPo battery with charging circuit
+#Features
+🎵 MP3 playback from SD card
+📁 Folder-based organisation (Albums / Playlists)
+🔀 Playback modes (sequential, shuffle)
+📺 Real-time OLED UI
+🔊 Volume control
+🔋 Portable battery-powered design
