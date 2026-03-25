@@ -1,6 +1,6 @@
 # MP3 Xiao
 
-A portable DIY MP3 player built using the Seeed Studio XIAO ESP32-S3
+A portable DIY MP3 player built using the [Seeed Studio XIAO ESP32-S3](https://wiki.seeedstudio.com/xiao_esp32s3_getting_started/)
 
 ## Overview
 
