@@ -56,8 +56,8 @@ I was looking for a small, simple, cheap and high quality mp3 player but couldn'
 
 ### Initialising...
 
-### Shuffle
-On startup the device defaults to shuffle mode, which randomly selects tracks anywhere on the SD card to play.
+### Shuffle All
+On startup the device defaults to shuffle all mode, which plays tracks randomly from anywhere on the sd card. Shows song and artist name, along with a progress and volume bar.
 
 <img src="v1/images/UI/shuffle.JPEG" width="250">
 
