@@ -33,7 +33,7 @@ I was looking for a small, simple, cheap and high quality mp3 player but couldn'
     </td>
     <!-- Right column: image -->
     <td valign="top">
-      <img src="v1/images/playing.JPEG" width="250">
+      <img src="v1/images/playing.JPEG" width="500">
     </td>
   </tr>
 </table>
