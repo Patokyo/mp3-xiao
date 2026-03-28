@@ -13,21 +13,25 @@ MP3 Xiao is a compact, battery-powered music player designed from scratch. It fe
 I was looking for a small, simple, cheap and high quality mp3 player but couldn't find one that fit all my needs - so I built one! All the components together cost less than $40 AUD, it fits in my pocket and the audio playback is crisp. The files in this repo consist of all my prototyping and testing to get all the components to work together, my C++ Arduino firmware for the device (including a python script to format the sd card so the esp32 can understand) and the CAD files for my 3d-printed case design. I also included some photos of the finished v1 device.
 
 ## Features
-🎵 MP3 playback from SD card
+<table>
+  <tr>
+    <!-- Left column: features list -->
+    <td valign="top">
+      🎵 MP3 playback from SD card<br>
+      📁 Album & Playlist selection<br>
+      🔀 Sequential and shuffle playback options<br>
+      🔊 Volume control<br>
+      🔋 Battery powered with USB-C charging<br>
+      🧵 3D-printed case<br>
+      🤏 Small form factor
+    </td>
 
-📁 Album & Playlist selection
-
-🔀 Sequential and shuffle playback options
-
-🔊 Volume control
-
-🔋 Battery powered with USB-C charging
-
-🧵 3D-printed case
-
-🤏 Small form factor
-
-<img src="v1/images/playing.JPEG" width="500">
+    <!-- Right column: image -->
+    <td>
+      <img src="v1/images/playing.JPEG" width="250">
+    </td>
+  </tr>
+</table>
 
 ## Hardware Components
 
