@@ -19,7 +19,7 @@ Display: SSD1306 OLED (128×64, I2C, 4-pin)
 
 Input: 3× push buttons (via resistor ladder)
 
-Power: LiPo battery with charging circuit
+Power: LiPo battery with charging circuit (600mAh 3.7V 503040)
 
 ## Features
 🎵 MP3 playback from SD card
