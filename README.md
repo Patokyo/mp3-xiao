@@ -18,16 +18,21 @@ I was looking for a small, simple, cheap and high quality mp3 player but couldn'
     <!-- Left column: features list -->
     <td valign="top">
       🎵 MP3 playback from SD card<br>
+      <br>
       📁 Album & Playlist selection<br>
+      <br>
       🔀 Sequential and shuffle playback options<br>
+      <br>
       🔊 Volume control<br>
+      <br>
       🔋 Battery powered with USB-C charging<br>
+      <br>
       🧵 3D-printed case<br>
+      <br>
       🤏 Small form factor
     </td>
-
     <!-- Right column: image -->
-    <td>
+    <td valign="top">
       <img src="v1/images/playing.JPEG" width="250">
     </td>
   </tr>
