@@ -21,12 +21,13 @@ I was looking for a small, simple, cheap and high quality mp3 player but couldn'
 
 🔊 Volume control
 
-🔋 Portable battery-powered design
+🔋 Battery powered with USB-C charging
 
 🧵 3D-printed case
 
 🤏 Small form factor
 
+<img src="v1/images/playing.JPEG" width="500">
 
 ## Hardware Components
 
