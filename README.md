@@ -10,22 +10,22 @@ MP3 Xiao is a compact, battery-powered music player designed from scratch. It fe
 
 ## Hardware Components
 Microcontroller: Seeed Studio XIAO ESP32-S3
-![xiaoesp32s3](images/xiaoesp32s3.jpg)
+<img src="images/xiaoesp32s3.jpg" width="250">
 
 DAC: PCM5102A (I2S, 3.5mm audio output)
-![PCM5102A](images/PCM5102A.png)
+<img src="images/PCM5102A.png" width="250">
 
 Storage: MicroSD card module
-![microsdmodule](images/microsdmodule.jpg)
+<img src="images/microsdmodule.jpg" width="250">
 
 Display: SSD1306 OLED (128×64, I2C, 4-pin)
-![ssd1306](images/ssd1306)
+<img src="images/SSD1306" width="250">
 
 Input: 3× push buttons (via resistor ladder)
-![pushbutton](images/pushbutton.jpg)
+<img src="images/pushbutton.jpg" width="250">
 
 Power: LiPo battery with charging circuit (600mAh 3.7V 503040)
-![lipo503040](images/lipo503040.jpg)
+<img src="images/lipo503040.jpg" width="250">
 
 ## Features
 🎵 MP3 playback from SD card
