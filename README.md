@@ -55,6 +55,7 @@ I was looking for a small, simple, cheap and high quality mp3 player but couldn'
 ## UI Showcase
 
 ### Initialising...
+Shows the text "Initialising..." on the OLED whilst the device sets up the SD card and chooses the first song to play.
 
 ### Shuffle All
 On startup the device defaults to shuffle all mode, which plays tracks randomly from anywhere on the sd card. Shows song and artist name, along with a progress and volume bar.
@@ -62,7 +63,7 @@ On startup the device defaults to shuffle all mode, which plays tracks randomly 
 <img src="v1/images/UI/shuffle.JPEG" width="250">
 
 ### Navigation
-Hold down the big button to enter navigation mode, using the up and down button to select between Shuffle, Album and Playlist, then release to continue.
+Hold down the big button to enter navigation mode, using the up and down button to select between Shuffle, Albums and Playlists, then release to continue.
 
 <img src="v1/images/UI/navigation.JPEG" width="250">
 
