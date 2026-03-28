@@ -6,7 +6,7 @@ A portable DIY MP3 player built using the Seeed Studio XIAO ESP32-S3
 
 ## Overview
 
-MP3 Xiao is a compact, battery-powered music player designed from scratch using embedded systems principles. It features SD card audio playback, a simple button-based interface, and a clean OLED display for navigation and playback information.
+MP3 Xiao is a compact, battery-powered music player designed from scratch. It features SD card audio playback, a simple button-based interface, and a clean OLED display for navigation and playback information.
 
 ## Hardware Components
 Microcontroller: Seeed Studio XIAO ESP32-S3
