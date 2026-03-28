@@ -1,6 +1,7 @@
 # MP3 Xiao
 
 A portable DIY MP3 player built using the Seeed Studio XIAO ESP32-S3
+
 <img src="v1/images/cover.JPEG" width="500">
 
 
@@ -50,6 +51,35 @@ Power: LiPo battery with charging circuit (600mAh 3.7V 503040)
 
 ## About the device
 I was looking for a small, simple, cheap and high quality mp3 player but couldn't find one that fit all my needs - so I built one! All the components together cost less than $40 AUD, it fits in my pocket and the audio playback is crisp. The files in this repo consist of all my prototyping and testing to get all the components to work together, my C++ Arduino firmware for the device (including a python script to format the sd card so the esp32 can understand) and the CAD files for my 3d-printed case design. I also included some photos of the finished v1 decive.
+
+## UI Showcase
+
+### Initialising...
+
+### Shuffle
+On startup the device defaults to shuffle mode, which randomly selects tracks anywhere on the SD card to play.
+
+<img src="v1/images/UI/shuffle.JPEG" width="250">
+
+### Navigation
+Hold down the big button to enter navigation mode, using the up and down button to select between Shuffle, Album and Playlist, then release to continue.
+
+<img src="v1/images/UI/navigation.JPEG" width="250">
+
+### Select
+Displays all the albums or playlists stored on the SD card in alphabetical order. Use the up and down button to smoothly scroll through, and the big button to select.
+
+<img src="v1/images/UI/albumSelect.JPEG" width="250">
+
+### Album Play
+Displays the album name and a sequential indicator showing that it will play each song in album order. Shows song and artist name, along with a progress and volume bar.
+
+<img src="v1/images/UI/albumPlay.JPEG" width="250">
+
+### Playlist Play
+Displays the playlist name and a shuffle indicator showing that it will play songs in random order. Shows song and aritst name, along with a progress and volume bar.
+
+<img src="v1/images/UI/playlistPlay.JPEG" width="250">
 
 ## Updates
 Currently working on V2 - a custom PCB to fit all the components into a nicer paackage.
